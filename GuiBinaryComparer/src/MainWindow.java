@@ -41,15 +41,15 @@ public class MainWindow {
 					Button compareFile = new Button("Compare Both Files");
 				resultBox.getChildren().addAll(resultLabel, compareFile);
 
-				VBox segmentA = segment.getFileComparisonSegment("File");
-				VBox segmentB = segment.getFileComparisonSegment("File");
+				VBox segmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
+				VBox segmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
 			fileComparison.getChildren().addAll(segmentA, resultBox, segmentB);
 		
 			VBox folderComparisonAndResult = new VBox();
-				HBox folderComparison = new HBox();
-					VBox folderSegmentA = segment.getFileComparisonSegment("Folder");
+				HBox folderComparison = new HBox(); folderComparison.setAlignment(Pos.CENTER); folderComparison.setSpacing(30);
+					VBox folderSegmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					Button compareFolder = new Button("Compare both folders");
-					VBox folderSegmentB = segment.getFileComparisonSegment("Folder");
+					VBox folderSegmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					folderComparison.getChildren().addAll(folderSegmentA,compareFolder,folderSegmentB);
 				VBox folderResults = new VBox();
 			folderComparisonAndResult.getChildren().addAll(folderComparison,folderResults);
@@ -58,6 +58,7 @@ public class MainWindow {
 		
 		
 		Scene scene = new Scene(root, 650, 500, Color.BLACK);
+		
 		compareFile.setOnAction(e -> {
 			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB, null)) {
 				resultLabel.setText("Files are binary equal");
