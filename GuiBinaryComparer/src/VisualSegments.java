@@ -7,13 +7,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class FileSegment {
+public class VisualSegments {
 
-	public VBox getFileSegment() {
+	public VBox getFileComparisonSegment() {
 
 		VBox fileBox = new VBox();
 		Label titleFile = new Label();

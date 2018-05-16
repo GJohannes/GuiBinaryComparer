@@ -43,9 +43,9 @@ public class MainWindow {
 		Button compareFile = new Button();
 		resultBox.getChildren().addAll(resultLabel, compareFile);
 
-		FileSegment segment = new FileSegment();
-		VBox segmentA = segment.getFileSegment();
-		VBox segmentB = segment.getFileSegment();
+		VisualSegments segment = new VisualSegments();
+		VBox segmentA = segment.getFileComparisonSegment();
+		VBox segmentB = segment.getFileComparisonSegment();
 
 		compareFile.setOnAction(e -> {
 			this.compareFiles(segmentA, segmentB, resultLabel);
