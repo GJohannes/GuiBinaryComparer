@@ -27,92 +27,58 @@ public class MainWindow {
 	}
 
 	private Scene mainWindowVisuals(Stage stage) {
-		VBox root = new VBox();
-
-		HBox titleBox = new HBox();
-		Label title = new Label();
-		title.setText("Binarie Comparer");
-		titleBox.setAlignment(Pos.CENTER);
-		titleBox.getChildren().add(title);
-
-		HBox fileComparison = new HBox();
-
-		VBox resultBox = new VBox();
-		Label resultLabel = new Label();
-		resultLabel.setText("Result:               ");
-		Button compareFile = new Button();
-		resultBox.getChildren().addAll(resultLabel, compareFile);
-
+		MainWindowController controller = new MainWindowController();
 		VisualSegments segment = new VisualSegments();
-		VBox segmentA = segment.getFileComparisonSegment();
-		VBox segmentB = segment.getFileComparisonSegment();
+		
+		VBox root = new VBox();root.setSpacing(20);
+			HBox titleBox = new HBox();titleBox.setAlignment(Pos.CENTER);titleBox.centerShapeProperty();
+				Label title = new Label();title.setText("Binarie Comparer");	
+			titleBox.getChildren().add(title);
 
+			HBox fileComparison = new HBox();fileComparison.setSpacing(10);fileComparison.setAlignment(Pos.CENTER);
+				VBox resultBox = new VBox();
+					Label resultLabel = new Label();resultLabel.setText("Result:               ");
+					Button compareFile = new Button("Compare Both Files");
+				resultBox.getChildren().addAll(resultLabel, compareFile);
+
+				VBox segmentA = segment.getFileComparisonSegment("File");
+				VBox segmentB = segment.getFileComparisonSegment("File");
+			fileComparison.getChildren().addAll(segmentA, resultBox, segmentB);
+		
+			VBox folderComparisonAndResult = new VBox();
+				HBox folderComparison = new HBox();
+					VBox folderSegmentA = segment.getFileComparisonSegment("Folder");
+					Button compareFolder = new Button("Compare both folders");
+					VBox folderSegmentB = segment.getFileComparisonSegment("Folder");
+					folderComparison.getChildren().addAll(folderSegmentA,compareFolder,folderSegmentB);
+				VBox folderResults = new VBox();
+			folderComparisonAndResult.getChildren().addAll(folderComparison,folderResults);
+		
+		root.getChildren().addAll(titleBox, fileComparison,folderComparisonAndResult);
+		
+		
+		Scene scene = new Scene(root, 650, 500, Color.BLACK);
 		compareFile.setOnAction(e -> {
-			this.compareFiles(segmentA, segmentB, resultLabel);
+			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB, null)) {
+				resultLabel.setText("Files are binary equal");
+			} else {
+				resultLabel.setText("not equal Files");
+				
+			}
+		});
+		
+		compareFolder.setOnAction(e -> {
+			folderResults.getChildren().clear();
+			controller.areFoldersInSegmentBinaryEqual(folderSegmentA, folderSegmentB, folderResults);
+			
+			
 		});
 
-		fileComparison.getChildren().addAll(segmentA, resultBox, segmentB);
-
-		root.getChildren().addAll(titleBox, fileComparison);
-		titleBox.centerShapeProperty();
-
-		Scene scene = new Scene(root, 500, 500, Color.BLACK);
+		
 
 		return scene;
 	}
 
-	private void compareFiles(Parent parentA, Parent parentB, Label result) {
-		File fileA = null;
-		File fileB = null;
 
-		for (int i = 0; i < parentA.getChildrenUnmodifiable().size(); i++) {
-			if (parentA.getChildrenUnmodifiable().get(i) instanceof TextField) {
-				TextField textfield = (TextField) parentA.getChildrenUnmodifiable().get(i);
-				fileA = new File(textfield.getText());
-			}
-		}
 
-		for (int i = 0; i < parentB.getChildrenUnmodifiable().size(); i++) {
-			if (parentB.getChildrenUnmodifiable().get(i) instanceof TextField) {
-				TextField textfield = (TextField) parentB.getChildrenUnmodifiable().get(i);
-				fileB = new File(textfield.getText());
-			}
-		}
-
-		Path pathFileA = Paths.get(fileA.getPath());
-		Path pathFileB = Paths.get(fileB.getPath());
-
-		byte[] bytesFileA = getBinarieFromLocation(pathFileA);
-		byte[] bytesFileB = getBinarieFromLocation(pathFileB);
-
-		if (bytesFileA.length != bytesFileB.length) {
-			result.setText("not equal Files");
-			return;
-		} else {
-			for (int i = 0; i < bytesFileA.length; i++) {
-				if (bytesFileA[i] != bytesFileB[i]) {
-					result.setText("not equal Files");
-					return;
-				}
-			}
-		}
-		
-		result.setText("Files are binary equal");
-		return;
-
-	}
-
-	public byte[] getBinarieFromLocation(Path path) {
-		try {
-			return Files.readAllBytes(path);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private void mainWindowController() {
-
-	}
 }

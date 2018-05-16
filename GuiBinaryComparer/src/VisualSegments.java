@@ -12,13 +12,13 @@ import javafx.stage.Stage;
 
 public class VisualSegments {
 
-	public VBox getFileComparisonSegment() {
+	public VBox getFileComparisonSegment(String whatToCompare) {
 
 		VBox fileBox = new VBox();
 		Label titleFile = new Label();
 		titleFile.setText("Insert File path Below");
 		TextField fileLocation = new TextField();
-		Button chooseFile = new Button();
+		Button chooseFile = new Button("Select a " + whatToCompare);
 
 		chooseFile.setOnAction(e -> {
 			this.chooseFileA(fileLocation);
