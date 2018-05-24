@@ -9,15 +9,17 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 
 public class MainWindowController {
-	public boolean areFoldersInSegmentBinaryEqual(Parent parentA, Parent parentB, Parent target) {
+	public boolean areFoldersInSegmentBinaryEqual(Pane parentA, Pane parentB, Pane target) {
 		File directoryOrFileA = null;
 		File directoryOrFileB = null;
 
+		//get textfield from file segment
 		for (int i = 0; i < parentA.getChildrenUnmodifiable().size(); i++) {
 			if (parentA.getChildrenUnmodifiable().get(i) instanceof TextField) {
 				TextField textfield = (TextField) parentA.getChildrenUnmodifiable().get(i);
@@ -25,6 +27,7 @@ public class MainWindowController {
 			}
 		}
 
+		//get textfield from file segment
 		for (int i = 0; i < parentB.getChildrenUnmodifiable().size(); i++) {
 			if (parentB.getChildrenUnmodifiable().get(i) instanceof TextField) {
 				TextField textfield = (TextField) parentB.getChildrenUnmodifiable().get(i);
@@ -32,9 +35,13 @@ public class MainWindowController {
 			}
 		}
 
+		// get values from textfield and read content as files 
+		
+		//first case is that folders/directorys are in both segemnts
 		if (directoryOrFileA != null && directoryOrFileA.exists() && directoryOrFileA.isDirectory()
 				&& directoryOrFileB != null && directoryOrFileB.exists() && directoryOrFileB.isDirectory()) {
 			return areFoldersEqual(directoryOrFileA, directoryOrFileB, target);
+		// second case is that both values represent files
 		} else if (directoryOrFileA != null && directoryOrFileA.exists() && directoryOrFileA.isFile()
 				&& directoryOrFileB != null && directoryOrFileB.exists() && directoryOrFileB.isFile()) {
 			return areFilesBinaryEqual(directoryOrFileA, directoryOrFileB);
@@ -47,31 +54,38 @@ public class MainWindowController {
 		ArrayList<File> filesFromDirectoryA = new ArrayList<>();
 		ArrayList<File> filesFromDirectoryB = new ArrayList<>();
 		filesFromDirectoryA = this.allFilesInFolderAndSubfolder(directoryA, filesFromDirectoryA);
+		System.out.println(" -- Finished mapping first directory --");
 		filesFromDirectoryB = this.allFilesInFolderAndSubfolder(directoryB, filesFromDirectoryB);
-
+		System.out.println(" -- finioshed mapping second directory --");
 		
 		for (int i = 0; i < filesFromDirectoryA.size(); i++) {
+			// create a new horizontal line for each file in the first folder. if there is 
+			//a successful binary match or not wil be drawn into the inner : for loop
+			VBox newTarget = (VBox) target;
+				HBox oneComparison = new HBox();
+					TextField firstFile = new TextField();
+					Label resultSingleFile = new Label();
+					TextField secondFile = new TextField();
+				oneComparison.getChildren().addAll(firstFile, resultSingleFile, secondFile);
+			newTarget.getChildren().add(oneComparison);
+		
+			// inner for loop determening if a match is found to the current selected file in all files inside the second folder.
 			inner: for (int j = 0; j < filesFromDirectoryB.size(); j++) {
 				if(areFilesBinaryEqual(filesFromDirectoryA.get(i), filesFromDirectoryB.get(j))) {
-					VBox newTarget = (VBox) target;
-					Label resultSingleFile = new Label();
-					 resultSingleFile.setTextFill(Color.web("#7CFC00"));
-					resultSingleFile.setText(filesFromDirectoryA.get(i).getName() + " is binary equal to " + filesFromDirectoryB.get(j).getName());	
-					newTarget.getChildren().add(resultSingleFile);
-					filesFromDirectoryA.set(i, null);
+					firstFile.setText(filesFromDirectoryA.get(i).getName());
+					resultSingleFile.setTextFill(Color.web("#7CFC00"));
+					resultSingleFile.setText(" -- is binary equal to -- ");	
+					secondFile.setText(filesFromDirectoryB.get(j).getName());
 					break inner;
-					
 				} 
+				// last run through all existing files had no match. 
 				else if(j == filesFromDirectoryB.size()-1) {
-					VBox newTarget = (VBox) target;
-					Label resultSingleFile = new Label();
-					resultSingleFile.setText(filesFromDirectoryA.get(i).getName() + "has no binary equal match");
+					firstFile.setText(filesFromDirectoryA.get(i).getName());
 					resultSingleFile.setTextFill(Color.web("#FA8072"));
-					newTarget.getChildren().add(resultSingleFile);
+					resultSingleFile.setText(" -- has no binary equal match");	
 					break inner;
 				}
 			}
-
 		}
 
 		for(int i = 0; i < filesFromDirectoryA.size(); i++) {

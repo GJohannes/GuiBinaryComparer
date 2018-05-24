@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -21,7 +22,7 @@ public class MainWindow {
 
 	public void start(Stage stage) {
 		Scene scene = mainWindowVisuals(stage);
-		stage.setTitle("TestFX");
+		stage.setTitle("BinaryComparer");
 		stage.setScene(scene);
 		stage.show();
 	}
@@ -51,13 +52,17 @@ public class MainWindow {
 					Button compareFolder = new Button("Compare both folders");
 					VBox folderSegmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					folderComparison.getChildren().addAll(folderSegmentA,compareFolder,folderSegmentB);
-				VBox folderResults = new VBox();
+					VBox folderResults = new VBox();
+						Pane scrollPane = new Pane();
+						folderResults.getChildren().add(scrollPane);
 			folderComparisonAndResult.getChildren().addAll(folderComparison,folderResults);
 		
 		root.getChildren().addAll(titleBox, fileComparison,folderComparisonAndResult);
 		
+		ScrollPane scroll = new ScrollPane();
+		scroll.setContent(root);
 		
-		Scene scene = new Scene(root, 650, 500, Color.BLACK);
+		Scene scene = new Scene(scroll, 650, 500, Color.BLACK);
 		
 		compareFile.setOnAction(e -> {
 			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB, null)) {
