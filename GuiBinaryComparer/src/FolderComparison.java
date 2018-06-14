@@ -1,8 +1,11 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.concurrent.Task;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -37,22 +40,38 @@ public class FolderComparison implements Runnable{
 			// create a new horizontal line for each file in the first folder. if there is 
 			//a successful binary match or not wil be drawn into the inner : for loop
 			//VBox newTarget = values.getFolderComparisonResult();
-				HBox oneComparison = new HBox();
+				HBox oneComparison = new HBox();oneComparison.setAlignment(Pos.CENTER);
+					Button pathToFirstFile = new Button("Show");
 					TextField firstFile = new TextField();
 					Label resultSingleFile = new Label();
 					TextField secondFile = new TextField();
-				oneComparison.getChildren().addAll(firstFile, resultSingleFile, secondFile);
-
-			
-	
-			
+					Button pathToSecondFile = new Button("Show");
+				oneComparison.getChildren().addAll(pathToFirstFile,firstFile, resultSingleFile, secondFile,pathToSecondFile);			
 			// inner for loop determening if a match is found to the current selected file in all files inside the second folder.
 			inner: for (int j = 0; j < filesFromDirectoryB.size(); j++) {
 				if(fileComparison.areFilesBinaryEqual(filesFromDirectoryA.get(i), filesFromDirectoryB.get(j))) {
 					firstFile.setText(filesFromDirectoryA.get(i).getName());
+					String path = filesFromDirectoryA.get(i).getAbsolutePath();
+					pathToFirstFile.setOnMouseClicked(e -> {
+						try {
+							Runtime.getRuntime().exec("explorer.exe /select," + path);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					});
+					
 					resultSingleFile.setTextFill(Color.web("#7CFC00"));
 					resultSingleFile.setText(" -- is binary equal to -- ");	
+					
 					secondFile.setText(filesFromDirectoryB.get(j).getName());
+					String secondPath = filesFromDirectoryB.get(j).getAbsolutePath();
+					pathToSecondFile.setOnMouseClicked(e -> {
+						try {
+							Runtime.getRuntime().exec("explorer.exe /select," + secondPath);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					});
 					values.addHBoxToGuiQueue(oneComparison);
 					values.setProgressValue(values.getProgressValue() + percentProgressPerFile);
 					break inner;
@@ -61,7 +80,16 @@ public class FolderComparison implements Runnable{
 				else if(j == filesFromDirectoryB.size()-1) {
 					firstFile.setText(filesFromDirectoryA.get(i).getName());
 					resultSingleFile.setTextFill(Color.web("#FA8072"));
-					resultSingleFile.setText(" -- has no binary equal match");	
+					resultSingleFile.setText(" -- has no binary equal match");
+					String path = filesFromDirectoryA.get(i).getAbsolutePath();
+					pathToFirstFile.setOnMouseClicked(e -> {
+						try {
+							Runtime.getRuntime().exec("explorer.exe /select," + path);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					});
+					
 					values.addHBoxToGuiQueue(oneComparison);
 					values.setProgressValue(values.getProgressValue() + percentProgressPerFile);
 					break inner;
