@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javafx.concurrent.Task;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -17,12 +18,14 @@ import javafx.stage.DirectoryChooser;
 
 public class MainWindowController{
 	
-	public boolean areFoldersInSegmentBinaryEqual(Pane parentA, Pane parentB) {
+	/*
+	 * returns false if inputs cant be read correctly
+	 */
+	public boolean areFoldersInSegmentBinaryEqual(Pane parentA, Pane parentB, MainWindow mainWindow) {
+		GuiAndWorkerSharedValues sharedValuesGuiWorker = new GuiAndWorkerSharedValues();
 		File directoryOrFileA = null;
 		File directoryOrFileB = null;
 		FileComparison fileComparison = new FileComparison();
-		
-		
 		
 		//get textfield from file segment
 		for (int i = 0; i < parentA.getChildrenUnmodifiable().size(); i++) {
@@ -39,7 +42,8 @@ public class MainWindowController{
 				directoryOrFileB = new File(textfield.getText());
 			}
 		}
-
+		
+		
 		Thread folderComparison = new Thread(new FolderComparison(directoryOrFileA, directoryOrFileB));
 		
 		// get values from textfield and read content as files 
@@ -48,14 +52,21 @@ public class MainWindowController{
 		if (directoryOrFileA != null && directoryOrFileA.exists() && directoryOrFileA.isDirectory()
 				&& directoryOrFileB != null && directoryOrFileB.exists() && directoryOrFileB.isDirectory()) {
 			
+			sharedValuesGuiWorker.setFinishedMappingA(false);
+			sharedValuesGuiWorker.setFinishedMappingB(false);
+			mainWindow.folderResults.getChildren().clear();
+			sharedValuesGuiWorker.clearList();
+			sharedValuesGuiWorker.setProgressValue(0);
+			mainWindow.informationMappingFilesA.setGraphic(mainWindow.images.getWaitingIcon());mainWindow.informationMappingFilesA.setText("Started Mapping ");
+			mainWindow.informationMappingFilesB.setText("Started Mapping ");mainWindow.informationMappingFilesB.setGraphic(mainWindow.images.getWaitingIcon());mainWindow.informationMappingFilesB.setAlignment(Pos.CENTER_RIGHT);
+			mainWindow.compareFolder.setDisable(true);
+			sharedValuesGuiWorker.setWorkerRunning(true);
+			
 			folderComparison.start();
 			
 			//return folderComparison.areFoldersEqual(directoryOrFileA, directoryOrFileB, target);
 			
-			
-			return true;
-			
-			
+
 		// second case is that both values represent files
 		} else if (directoryOrFileA != null && directoryOrFileA.exists() && directoryOrFileA.isFile()
 				&& directoryOrFileB != null && directoryOrFileB.exists() && directoryOrFileB.isFile()) {
@@ -63,6 +74,9 @@ public class MainWindowController{
 		} else {
 			return false;
 		}
+		
+		return false;
+		
 	}
 
 	}

@@ -36,6 +36,11 @@ import javafx.util.Duration;
 
 public class MainWindow {
 	private int windowSize = 800;
+	VBox folderResults;
+	Label informationMappingFilesA;
+	Label informationMappingFilesB;
+	ImageLoader images = new ImageLoader();
+	Button compareFolder;
 	
 	public void start(Stage stage) {
 		Scene scene = mainWindowVisuals(stage);
@@ -46,8 +51,6 @@ public class MainWindow {
 	}
 
 	private Scene mainWindowVisuals(Stage stage) {
-		ImageLoader images = new ImageLoader();
-		
 		VisualSegments segment = new VisualSegments();
 		
 		VBox root = new VBox();root.setSpacing(20);root.setStyle("-fx-background-color: #b7b7db;");root.setPrefWidth(windowSize);
@@ -68,19 +71,19 @@ public class MainWindow {
 			VBox folderComparisonAndResult = new VBox();
 				HBox folderComparison = new HBox(); folderComparison.setAlignment(Pos.CENTER); folderComparison.setSpacing(30);
 					VBox folderSegmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
-					Button compareFolder = new Button("Compare both folders");
+					compareFolder = new Button("Compare both folders");
 					VBox folderSegmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					folderComparison.getChildren().addAll(folderSegmentA,compareFolder,folderSegmentB);
 					
 					HBox infoBox = new HBox();infoBox.setAlignment(Pos.CENTER);infoBox.centerShapeProperty();infoBox.setSpacing(80);
-						Label informationMappingFilesA = new Label();informationMappingFilesA.setAlignment(Pos.CENTER_LEFT);
+						informationMappingFilesA = new Label();informationMappingFilesA.setAlignment(Pos.CENTER_LEFT);
 						VBox progress = new VBox();progress.setAlignment(Pos.CENTER);						
 							Label percentageDone = new Label();percentageDone.setTextAlignment(TextAlignment.CENTER);
 							ProgressBar progressBar = new ProgressBar(0.0);progressBar.setPrefWidth(150);
 						progress.getChildren().addAll(progressBar,percentageDone);
-						Label informationMappingFilesB = new Label();
+						informationMappingFilesB = new Label();
 						infoBox.getChildren().addAll(informationMappingFilesA, progress, informationMappingFilesB);
-					VBox folderResults = new VBox();folderResults.setAlignment(Pos.CENTER);
+					folderResults = new VBox();folderResults.setAlignment(Pos.CENTER);
 //						Pane scrollPane = new Pane();
 //						folderResults.getChildren().add(scrollPane);
 			folderComparisonAndResult.getChildren().addAll(folderComparison,infoBox,folderResults);
@@ -94,7 +97,7 @@ public class MainWindow {
 		MainWindowController controller = new MainWindowController();
 		
 		compareFile.setOnAction(e -> {
-			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB)) {
+			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB, this)) {
 				resultLabel.setText("Files are binary equal");
 				resultLabel.setGraphic(images.getGreenCheckIcon());
 			} else {
@@ -104,43 +107,41 @@ public class MainWindow {
 		});
 		
 		compareFolder.setOnAction(e -> {
-			ProgressValues values = new ProgressValues();
-			values.setFinishedMappingA(false);
-			values.setFinishedMappingB(false);
-			folderResults.getChildren().clear();
-			values.clearList();
-			values.setProgressValue(0);
-			informationMappingFilesA.setGraphic(images.getWaitingIcon());informationMappingFilesA.setText("Started Mapping ");
-			informationMappingFilesB.setText("Started Mapping ");informationMappingFilesB.setGraphic(images.getWaitingIcon());informationMappingFilesB.setAlignment(Pos.CENTER_RIGHT);
-			controller.areFoldersInSegmentBinaryEqual(folderSegmentA, folderSegmentB);
+			controller.areFoldersInSegmentBinaryEqual(folderSegmentA, folderSegmentB, this);
 		});
 		
 		
-		Timeline fiveSecondsWonder = new Timeline(new KeyFrame(Duration.millis(50), e -> {
-			ProgressValues values = new ProgressValues();
-			Number number = Math.round( values.getProgressValue());
+		Timeline updatingGuiTask = new Timeline(new KeyFrame(Duration.millis(50), e -> {
+			GuiAndWorkerSharedValues sharedValuesGuiWorker = new GuiAndWorkerSharedValues();
+			Number number = Math.round( sharedValuesGuiWorker.getProgressValue());
 			percentageDone.setText(number.intValue() + "%");
-			progressBar.setProgress(values.getProgressValue()/100);
+			progressBar.setProgress(sharedValuesGuiWorker.getProgressValue()/100);
 			
-			if(values.isFinishedMappingA()) {
+			if(sharedValuesGuiWorker.isWorkerRunning()) {
+				compareFolder.setDisable(true);
+			} else {
+				compareFolder.setDisable(false);
+			}
+			
+			if(sharedValuesGuiWorker.isFinishedMappingA()) {
 				informationMappingFilesA.setGraphic(images.getGreenCheckIcon());informationMappingFilesA.setText("Finished Mapping");
 			}
-			if(values.isFinishedMappingB()) {
+			if(sharedValuesGuiWorker.isFinishedMappingB()) {
 				informationMappingFilesB.setGraphic(images.getGreenCheckIcon());informationMappingFilesB.setText("Finished Mapping");
 			}
 			
-			
-			for(int i = 0; i < values.getFolderComparisonResult().size(); i++) {
+			// add all results that are not already added
+			for(int i = 0; i < sharedValuesGuiWorker.getFolderComparisonResult().size(); i++) {
 				//not contains
-				if(folderResults.getChildren().contains(values.getFolderComparisonResult().get(i)) == false) {
-					folderResults.getChildren().add(values.getFolderComparisonResult().get(i));
+				if(folderResults.getChildren().contains(sharedValuesGuiWorker.getFolderComparisonResult().get(i)) == false) {
+					folderResults.getChildren().add(sharedValuesGuiWorker.getFolderComparisonResult().get(i));
 				} 
 			}
 				
 	
 		}));
-		fiveSecondsWonder.setCycleCount(Timeline.INDEFINITE);
-		fiveSecondsWonder.play();
+		updatingGuiTask.setCycleCount(Timeline.INDEFINITE);
+		updatingGuiTask.play();
 		
 		
 		

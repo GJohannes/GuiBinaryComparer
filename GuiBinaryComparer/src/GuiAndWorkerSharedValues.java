@@ -3,18 +3,27 @@ import java.util.ArrayList;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class ProgressValues {
+public class GuiAndWorkerSharedValues {
 	private static double ProgressValue = 0;
 	private static ArrayList<HBox> listWithAllHBoxToAdd = new ArrayList<>();
 	private static boolean finishedMappingA = false;
 	private static boolean finishedMappingB = false;
+	private static boolean workerRunning = false;
 	
+	public static synchronized boolean isWorkerRunning() {
+		return workerRunning;
+	}
+
+	public static synchronized void setWorkerRunning(boolean workerRunning) {
+		GuiAndWorkerSharedValues.workerRunning = workerRunning;
+	}
+
 	public static synchronized boolean isFinishedMappingA() {
 		return finishedMappingA;
 	}
 
 	public static synchronized void setFinishedMappingA(boolean finishedMappingA) {
-		ProgressValues.finishedMappingA = finishedMappingA;
+		GuiAndWorkerSharedValues.finishedMappingA = finishedMappingA;
 	}
 
 	public static synchronized boolean isFinishedMappingB() {
@@ -22,7 +31,7 @@ public class ProgressValues {
 	}
 
 	public static synchronized void setFinishedMappingB(boolean finishedMappingB) {
-		ProgressValues.finishedMappingB = finishedMappingB;
+		GuiAndWorkerSharedValues.finishedMappingB = finishedMappingB;
 	}
 
 	public static synchronized ArrayList<HBox> getFolderComparisonResult() {

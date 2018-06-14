@@ -70,37 +70,37 @@ public class MainClass extends Application {
 		}
 	}
 
-	public static void readFile() {
-		File file = new File("C:\\Users\\vp5cmew\\Desktop\\wasd.txt");
-
-		try {
-			System.out.println(Files.readAllLines(file.toPath()));
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		FileInputStream stream = null;
-
-		try {
-			stream = new FileInputStream(file);
-
-			StringBuffer s = new StringBuffer();
-
-			int content;
-			while ((content = stream.read()) != -1) {
-				// convert to char and display it
-				System.out.print((char) content);
-			}
-
-			System.out.println(s);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
+//	public static void readFile() {
+//		File file = new File("C:\\Users\\vp5cmew\\Desktop\\wasd.txt");
+//
+//		try {
+//			System.out.println(Files.readAllLines(file.toPath()));
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//
+//		FileInputStream stream = null;
+//
+//		try {
+//			stream = new FileInputStream(file);
+//
+//			StringBuffer s = new StringBuffer();
+//
+//			int content;
+//			while ((content = stream.read()) != -1) {
+//				// convert to char and display it
+//				System.out.print((char) content);
+//			}
+//
+//			System.out.println(s);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//	}
 }

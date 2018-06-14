@@ -17,28 +17,27 @@ public class FolderComparison implements Runnable{
 	private File directoryB;
 	
 	public FolderComparison(File directoryA, File directoryB) {
-		System.out.println(directoryA + "Upper call");
+		
 		this.directoryA = directoryA;
 		this.directoryB = directoryB;
 	}
 	
-	
 	public boolean areFoldersEqual(File directoryA, File directoryB) {
-		ProgressValues values = new ProgressValues();
+		GuiAndWorkerSharedValues sharedValuesWorkerGui = new GuiAndWorkerSharedValues();
 		FileComparison fileComparison = new FileComparison();
 		ArrayList<File> filesFromDirectoryA = new ArrayList<>();
 		ArrayList<File> filesFromDirectoryB = new ArrayList<>();
 
 		filesFromDirectoryA = this.allFilesInFolderAndSubfolder(directoryA, filesFromDirectoryA);
-		values.setFinishedMappingA(true);
+		sharedValuesWorkerGui.setFinishedMappingA(true);
 		filesFromDirectoryB = this.allFilesInFolderAndSubfolder(directoryB, filesFromDirectoryB);
-		values.setFinishedMappingB(true);
+		sharedValuesWorkerGui.setFinishedMappingB(true);
 		
 		for (int i = 0; i < filesFromDirectoryA.size(); i++) {
 			double percentProgressPerFile = 100.0/filesFromDirectoryA.size(); 
 			
 			// create a new horizontal line for each file in the first folder. if there is 
-			//a successful binary match or not wil be drawn into the inner : for loop
+			//a successful binary match or not will be drawn into the inner : for loop
 			//VBox newTarget = values.getFolderComparisonResult();
 				HBox oneComparison = new HBox();oneComparison.setAlignment(Pos.CENTER);
 					Button pathToFirstFile = new Button("Show");
@@ -72,8 +71,8 @@ public class FolderComparison implements Runnable{
 							e1.printStackTrace();
 						}
 					});
-					values.addHBoxToGuiQueue(oneComparison);
-					values.setProgressValue(values.getProgressValue() + percentProgressPerFile);
+					sharedValuesWorkerGui.addHBoxToGuiQueue(oneComparison);
+					sharedValuesWorkerGui.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
 					break inner;
 				} 
 				// last run through all existing files had no match. 
@@ -90,8 +89,8 @@ public class FolderComparison implements Runnable{
 						}
 					});
 					
-					values.addHBoxToGuiQueue(oneComparison);
-					values.setProgressValue(values.getProgressValue() + percentProgressPerFile);
+					sharedValuesWorkerGui.addHBoxToGuiQueue(oneComparison);
+					sharedValuesWorkerGui.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
 					break inner;
 				}
 			}
@@ -100,7 +99,8 @@ public class FolderComparison implements Runnable{
 		HBox doneMessageBox = new HBox();
 			Label doneMessage = new Label(); doneMessage.setText("Finished Comparing Folders");
 			doneMessageBox.getChildren().add(doneMessage);
-		values.addHBoxToGuiQueue(doneMessageBox);
+		sharedValuesWorkerGui.addHBoxToGuiQueue(doneMessageBox);
+		sharedValuesWorkerGui.setWorkerRunning(false);
 			
 		
 //		for(int i = 0; i < filesFromDirectoryA.size(); i++) {
@@ -128,7 +128,8 @@ public class FolderComparison implements Runnable{
 	@Override
 	public void run() {
 		 this.areFoldersEqual(directoryA, directoryB);
-		 
+		 GuiAndWorkerSharedValues sharedValuesWorkerGui = new GuiAndWorkerSharedValues();
+		 sharedValuesWorkerGui.setWorkerRunning(false);
 	}
 
 
