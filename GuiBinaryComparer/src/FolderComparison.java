@@ -1,30 +1,84 @@
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import com.sun.media.jfxmedia.events.NewFrameEvent;
 
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 public class FolderComparison implements Runnable {
 	private File directoryA;
 	private File directoryB;
 
 	public FolderComparison(File directoryA, File directoryB) {
-
 		this.directoryA = directoryA;
 		this.directoryB = directoryB;
 	}
 
+	private EventHandler<MouseEvent> showFileInFileSystem(Path path){
+		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				System.out.println(System.getProperty("os.name"));
+				
+				if (System.getProperty("os.name").contains("Windows")) {
+					try {
+						Runtime.getRuntime().exec("explorer.exe /select," + path);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				} else if (System.getProperty("os.name").contains("Linux")) {
+					File file = new File(path.toString());
+					File parentFile = new File(file.getParent());
+					if (parentFile.exists() && parentFile.isDirectory()) {
+						Desktop desktop = Desktop.getDesktop();
+						try {
+							// this linux file system opening seems to be bugged
+							Desktop.getDesktop().open(parentFile);
+							// desktop.open(fileXYZ);
+						} catch (Exception e1) {
+							System.out.println("Catched exception");
+							e1.printStackTrace();
+						}
+					}
+				} else {
+					// TODO open dialog box not supported os
+					System.out.println("not suported os");
+					Stage stage = new Stage();
+					VBox box = new VBox();box.setAlignment(Pos.CENTER);box.setSpacing(15);
+					Scene scene = new Scene(box, 300, 100, Color.BLACK);
+					Label lable = new Label();
+					lable.setText("Not Supported OS to show file system");
+					Button closePopUp = new Button("OK");
+					closePopUp.setOnMouseClicked(e -> {
+						stage.close();
+					});
+					box.getChildren().addAll(lable, closePopUp);
+					stage.setScene(scene);
+					stage.show();
+				}	
+			}
+		};
+		return eventHandler;
+	}
+	
 	public boolean areFoldersEqual(File directoryA, File directoryB) {
 		GuiAndWorkerSharedValues sharedValuesWorkerGui = new GuiAndWorkerSharedValues();
 		FileComparison fileComparison = new FileComparison();
@@ -60,68 +114,18 @@ public class FolderComparison implements Runnable {
 					firstFile.setText(filesFromDirectoryA.get(i).getName());
 					// important to create new file becuase reference from list
 					// is gone when button is clicked
-					String path = filesFromDirectoryA.get(i).getAbsolutePath();
-
-					pathToFirstFile.setOnMouseClicked(e -> {
-						System.out.println(System.getProperty("os.name"));
-
-						if (System.getProperty("os.name").equals("Windows")) {
-							try {
-								Runtime.getRuntime().exec("explorer.exe /select," + path);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-						} else if (System.getProperty("os.name").equals("Linux")) {
-							System.out.println(1);
-							File file = new File(path);
-							File parentFile = new File(file.getParent());
-							System.out.println(file);
-							System.out.println(parentFile);
-
-							System.out.println(2);
-							System.out.println(parentFile);
-							if (parentFile.exists() && parentFile.isDirectory()) {
-								Desktop desktop = Desktop.getDesktop();
-
-								System.out.println("OPen Now");
-								System.out.println(desktop.isSupported(Desktop.Action.OPEN) + "open desktop");
-								try {
-									System.out.println("try topo");
-									File fileXYZ = new File("/home/guenthjs/Desktop/BA");
-									System.out.println("try middle");
-									Desktop.getDesktop().open(fileXYZ);
-									System.out.println("try bottom");
-									//desktop.open(fileXYZ);
-								} catch (Exception e1) {
-									System.out.println("Catched exception");
-									e1.printStackTrace();
-								}
-								System.out.println("Done");
-
-							}
-							System.out.println(3);
-						} else {
-							// TODO open dialog box not supported os
-							System.out.println("not suported os");
-						}
-						System.out.println("Done");
-					});
-
+					Path path = Paths.get(filesFromDirectoryA.get(i).getAbsolutePath());
+					pathToFirstFile.setOnMouseClicked(this.showFileInFileSystem(path));
+					
+					
 					resultSingleFile.setTextFill(Color.web("#7CFC00"));
 					resultSingleFile.setText(" -- is binary equal to -- ");
 
 					secondFile.setText(filesFromDirectoryB.get(j).getName());
-					String secondPath = filesFromDirectoryB.get(j).getAbsolutePath();
-					pathToSecondFile.setOnMouseClicked(e -> {
-						try {
-							Runtime.getRuntime().exec("explorer.exe /select," + secondPath);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					});
+					Path secondPath = Paths.get(filesFromDirectoryB.get(j).getAbsolutePath());
+					pathToSecondFile.setOnMouseClicked(this.showFileInFileSystem(secondPath));
 					sharedValuesWorkerGui.addHBoxToGuiQueue(oneComparison);
-					sharedValuesWorkerGui
-							.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
+					sharedValuesWorkerGui.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
 					break inner;
 				}
 				// last run through all existing files had no match.
@@ -129,19 +133,11 @@ public class FolderComparison implements Runnable {
 					firstFile.setText(filesFromDirectoryA.get(i).getName());
 					resultSingleFile.setTextFill(Color.web("#FA8072"));
 					resultSingleFile.setText(" -- has no binary equal match");
-					String path = filesFromDirectoryA.get(i).getAbsolutePath();
-					pathToFirstFile.setOnMouseClicked(e -> {
-						try {
-							System.out.println("open windows second button");
-							Runtime.getRuntime().exec("explorer.exe /select," + path);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					});
+					Path path = Paths.get(filesFromDirectoryA.get(i).getAbsolutePath());
+					pathToFirstFile.setOnMouseClicked(this.showFileInFileSystem(path));
 
 					sharedValuesWorkerGui.addHBoxToGuiQueue(oneComparison);
-					sharedValuesWorkerGui
-							.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
+					sharedValuesWorkerGui.setProgressValue(sharedValuesWorkerGui.getProgressValue() + percentProgressPerFile);
 					break inner;
 				}
 			}
