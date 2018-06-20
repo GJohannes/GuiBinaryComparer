@@ -36,8 +36,6 @@ public class FolderComparison implements Runnable {
 		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				System.out.println(System.getProperty("os.name"));
-				
 				if (System.getProperty("os.name").contains("Windows")) {
 					try {
 						Runtime.getRuntime().exec("explorer.exe /select," + path);
@@ -54,13 +52,10 @@ public class FolderComparison implements Runnable {
 							Desktop.getDesktop().open(parentFile);
 							// desktop.open(fileXYZ);
 						} catch (Exception e1) {
-							System.out.println("Catched exception");
 							e1.printStackTrace();
 						}
 					}
 				} else {
-					// TODO open dialog box not supported os
-					System.out.println("not suported os");
 					Stage stage = new Stage();
 					VBox box = new VBox();box.setAlignment(Pos.CENTER);box.setSpacing(15);
 					Scene scene = new Scene(box, 300, 100, Color.BLACK);
