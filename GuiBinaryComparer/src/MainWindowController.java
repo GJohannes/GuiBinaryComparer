@@ -4,7 +4,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -15,6 +18,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.util.Duration;
 
 public class MainWindowController{
 	
@@ -26,6 +30,7 @@ public class MainWindowController{
 		File directoryOrFileA = null;
 		File directoryOrFileB = null;
 		FileComparison fileComparison = new FileComparison();
+		
 		
 		//get textfield from file segment
 		for (int i = 0; i < parentA.getChildrenUnmodifiable().size(); i++) {
@@ -43,26 +48,48 @@ public class MainWindowController{
 			}
 		}
 		
+		FolderComparison folderComparison = new FolderComparison(directoryOrFileA, directoryOrFileB, mainWindow);
+		Thread thread = new Thread(folderComparison);
 		
-		Thread folderComparison = new Thread(new FolderComparison(directoryOrFileA, directoryOrFileB));
+		folderComparison.messageProperty().addListener(e ->{
+			if(folderComparison.getMessage().equals(STATES.FINISHED_FIRST_COMPARISON.toString())) {
+				mainWindow.informationMappingFilesA.setGraphic(mainWindow.images.getGreenCheckIcon());mainWindow.informationMappingFilesA.setText("Finished Mapping");				
+			} else if (folderComparison.getMessage().equals(STATES.FINISHED_SECOND_COMPARISON.toString())) {
+				mainWindow.informationMappingFilesB.setGraphic(mainWindow.images.getGreenCheckIcon());mainWindow.informationMappingFilesB.setText("Finished Mapping");
+				//Thread sometimes updates so fast that up can not pick it up. first message always already came if this message is displayed. 
+				//duplicate resolves the bug of not displaying first message result correctly
+				mainWindow.informationMappingFilesA.setGraphic(mainWindow.images.getGreenCheckIcon());mainWindow.informationMappingFilesA.setText("Finished Mapping");
+			}
+		});
 		
+		folderComparison.valueProperty().addListener(e -> {
+			mainWindow.folderResults.getChildren().add(folderComparison.getValue());
+		});
+		
+		folderComparison.progressProperty().addListener(e -> {
+			mainWindow.progressBar.setProgress(folderComparison.getProgress());
+			Number number = Math.round(folderComparison.getProgress()*100);
+			mainWindow.percentageDone.setText(number.intValue() + "%");
+		});
+		
+		folderComparison.setOnSucceeded(e -> {
+			mainWindow.compareFolder.setDisable(false);
+		});
 		// get values from textfield and read content as files 
 		
 		//first case is that folders/directories are in both segments
 		if (directoryOrFileA != null && directoryOrFileA.exists() && directoryOrFileA.isDirectory()
 				&& directoryOrFileB != null && directoryOrFileB.exists() && directoryOrFileB.isDirectory()) {
 			
-			sharedValuesGuiWorker.setFinishedMappingA(false);
-			sharedValuesGuiWorker.setFinishedMappingB(false);
 			mainWindow.folderResults.getChildren().clear();
-			sharedValuesGuiWorker.clearList();
-			sharedValuesGuiWorker.setProgressValue(0);
 			mainWindow.informationMappingFilesA.setGraphic(mainWindow.images.getWaitingIcon());mainWindow.informationMappingFilesA.setText("Started Mapping ");
 			mainWindow.informationMappingFilesB.setText("Started Mapping ");mainWindow.informationMappingFilesB.setGraphic(mainWindow.images.getWaitingIcon());mainWindow.informationMappingFilesB.setAlignment(Pos.CENTER_RIGHT);
 			mainWindow.compareFolder.setDisable(true);
-			sharedValuesGuiWorker.setWorkerRunning(true);
 			
-			folderComparison.start();
+			
+			thread.start();
+			
+			
 			
 			//return folderComparison.areFoldersEqual(directoryOrFileA, directoryOrFileB, target);
 			

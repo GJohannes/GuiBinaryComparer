@@ -30,7 +30,6 @@ public class MainClass extends Application {
 	public static void main(String[] args) throws AWTException, InterruptedException {
 		launch(args);
 		// readFile();
-
 	}
 
 	@Override
@@ -48,7 +47,14 @@ public class MainClass extends Application {
 //		stage.show();
 
 		 MainWindow window = new MainWindow();
+		 
+		 stage.setOnCloseRequest(e -> {
+				System.exit(0);
+				Platform.exit();
+		 });
+		 
 		 window.start(stage);
+		 
 	}
 
 	public void fxSameParentAsButton(Button button) {
