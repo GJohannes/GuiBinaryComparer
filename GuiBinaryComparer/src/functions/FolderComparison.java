@@ -1,3 +1,4 @@
+package functions;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 
 import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool;
 
+import gui.MainWindow;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -19,6 +21,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import miscellaneous.GuiAndWorkerSharedValues;
+import miscellaneous.STATES;
 
 public class FolderComparison extends Task<ArrayList<HBox>> {
 	private File directoryA;

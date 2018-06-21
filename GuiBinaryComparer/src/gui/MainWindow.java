@@ -1,3 +1,4 @@
+package gui;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,6 +16,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import miscellaneous.FileOrDirectory;
+import miscellaneous.ImageLoader;
 
 public class MainWindow {
 	private int windowSize = 800;

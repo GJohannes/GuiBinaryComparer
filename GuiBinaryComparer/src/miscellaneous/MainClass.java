@@ -1,3 +1,4 @@
+package miscellaneous;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import gui.MainWindow;
 import javafx.application.*;
 import javafx.stage.Stage;
 import javafx.scene.Group;

@@ -1,3 +1,4 @@
+package gui;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
+import functions.FileComparison;
+import functions.FolderComparison;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.concurrent.Task;
@@ -20,6 +23,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import miscellaneous.GuiAndWorkerSharedValues;
+import miscellaneous.ImageLoader;
+import miscellaneous.STATES;
 
 public class MainWindowController {
 	private MainWindow mainWindow;

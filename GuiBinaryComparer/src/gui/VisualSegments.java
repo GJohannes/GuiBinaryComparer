@@ -1,3 +1,5 @@
+package gui;
+
 import java.io.File;
 
 import javafx.geometry.Pos;
@@ -13,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import miscellaneous.FileOrDirectory;
 
 public class VisualSegments {
 
