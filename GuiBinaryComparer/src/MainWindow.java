@@ -27,6 +27,13 @@ public class MainWindow {
 	Button compareFolder;
 	ProgressBar progressBar;
 	Label percentageDone;
+	Label mappedTotalFiles;
+	Button compareFile;
+	Label resultLabel;
+	VBox segmentA;
+	VBox segmentB;
+	VBox folderSegmentA;
+	VBox folderSegmentB;
 	
 	public void start(Stage stage) {
 		Scene scene = mainWindowVisuals(stage);
@@ -46,25 +53,25 @@ public class MainWindow {
 
 			HBox fileComparison = new HBox();fileComparison.setSpacing(10);fileComparison.setAlignment(Pos.CENTER);
 				VBox resultBox = new VBox();
-					Label resultLabel = new Label();resultLabel.setText("Result:               ");
-					Button compareFile = new Button("Compare Both Files");
+					resultLabel = new Label();resultLabel.setText("Result:               ");
+					compareFile = new Button("Compare Both Files");
 				resultBox.getChildren().addAll(resultLabel, compareFile);
 
-				VBox segmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
-				VBox segmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
+				segmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
+				segmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.FILE);
 			fileComparison.getChildren().addAll(segmentA, resultBox, segmentB);
 		
 			VBox folderComparisonAndResult = new VBox();
 				HBox folderComparison = new HBox(); folderComparison.setAlignment(Pos.CENTER); folderComparison.setSpacing(30);
-					VBox folderSegmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
+					folderSegmentA = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					compareFolder = new Button("Compare both folders");
-					VBox folderSegmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
+					folderSegmentB = segment.getFileOrFolderComparisonSegment(FileOrDirectory.DIRECTORY);
 					folderComparison.getChildren().addAll(folderSegmentA,compareFolder,folderSegmentB);
 					
 					HBox infoBox = new HBox();infoBox.setAlignment(Pos.CENTER);infoBox.centerShapeProperty();infoBox.setSpacing(80);
 						informationMappingFilesA = new Label();informationMappingFilesA.setAlignment(Pos.CENTER_LEFT);
 						VBox progress = new VBox();progress.setAlignment(Pos.CENTER);						
-							Label mappedTotalFiles = new Label();
+							mappedTotalFiles = new Label();
 							percentageDone = new Label();percentageDone.setTextAlignment(TextAlignment.CENTER);
 							progressBar = new ProgressBar(0.0);progressBar.setPrefWidth(150);
 						progress.getChildren().addAll(mappedTotalFiles,progressBar,percentageDone);
@@ -81,35 +88,9 @@ public class MainWindow {
 		scroll.setContent(root);
 		
 		Scene scene = new Scene(scroll, windowSize, 400, Color.BLACK);
-		MainWindowController controller = new MainWindowController();
 		
-		compareFile.setOnAction(e -> {
-			if (controller.areFoldersInSegmentBinaryEqual(segmentA, segmentB, this)) {
-				resultLabel.setText("Files are binary equal");
-				resultLabel.setGraphic(images.getGreenCheckIcon());
-			} else {
-				resultLabel.setText("not equal Files");
-				resultLabel.setGraphic(images.getRedUnCheck());
-			}
-		});
-		
-		compareFolder.setOnAction(e -> {
-			GuiAndWorkerSharedValues.setTotalFiles(0);
-			controller.areFoldersInSegmentBinaryEqual(folderSegmentA, folderSegmentB, this);
-		});
-		
-		//update permanent 
-		Timeline updatingGuiTask = new Timeline(new KeyFrame(Duration.millis(50), e -> {
-			mappedTotalFiles.setText(Integer.toString(GuiAndWorkerSharedValues.getTotalFiles()) + " - Files Mapped");
-			System.out.println(folderResults.getChildren().size());
-		}));
-		
-		updatingGuiTask.setCycleCount(Timeline.INDEFINITE);
-		updatingGuiTask.play();
-		
-		
-		
-		
+	
+		MainWindowController controller = new MainWindowController(this);
 		return scene;
 	}
 
