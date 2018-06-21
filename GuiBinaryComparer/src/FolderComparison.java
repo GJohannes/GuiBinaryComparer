@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool;
 
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -19,11 +20,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class FolderComparison extends Task<HBox>{
+public class FolderComparison extends Task<ArrayList<HBox>> {
 	private File directoryA;
 	private File directoryB;
-	private int numberOfFiles = 0;
 	private MainWindow main;
+	private ArrayList<HBox> boxList = new ArrayList<>();
 
 	public FolderComparison(File directoryA, File directoryB, MainWindow main) {
 		this.directoryA = directoryA;
@@ -31,17 +32,13 @@ public class FolderComparison extends Task<HBox>{
 		this.main = main;
 	}
 
-
-	
 	public boolean areFoldersEqual(File directoryA, File directoryB) {
 		double currentProgress = 0;
-		
+
 		FileComparison fileComparison = new FileComparison();
 		ArrayList<File> filesFromDirectoryA = new ArrayList<>();
 		ArrayList<File> filesFromDirectoryB = new ArrayList<>();
-		
-			
-		
+
 		filesFromDirectoryA = this.allFilesInFolderAndSubfolder(directoryA, filesFromDirectoryA);
 		this.updateMessage(STATES.FINISHED_FIRST_COMPARISON.toString());
 		filesFromDirectoryB = this.allFilesInFolderAndSubfolder(directoryB, filesFromDirectoryB);
@@ -49,8 +46,7 @@ public class FolderComparison extends Task<HBox>{
 
 		for (int i = 0; i < filesFromDirectoryA.size(); i++) {
 			double percentProgressPerFile = 100.0 / filesFromDirectoryA.size();
-			
-			
+
 			// create a new horizontal line for each file in the first folder.
 			// if there is
 			// a successful binary match or not will be drawn into the inner :
@@ -70,22 +66,17 @@ public class FolderComparison extends Task<HBox>{
 			inner: for (int j = 0; j < filesFromDirectoryB.size(); j++) {
 				if (fileComparison.areFilesBinaryEqual(filesFromDirectoryA.get(i), filesFromDirectoryB.get(j))) {
 					firstFile.setText(filesFromDirectoryA.get(i).getName());
-					// important to create new file becuase reference from list
-					// is gone when button is clicked
 					Path path = Paths.get(filesFromDirectoryA.get(i).getAbsolutePath());
 					pathToFirstFile.setOnMouseClicked(this.showFileInFileSystem(path));
-					
+
 					resultSingleFile.setTextFill(Color.web("#7CFC00"));
 					resultSingleFile.setText(" -- is binary equal to -- ");
 
 					secondFile.setText(filesFromDirectoryB.get(j).getName());
 					Path secondPath = Paths.get(filesFromDirectoryB.get(j).getAbsolutePath());
 					pathToSecondFile.setOnMouseClicked(this.showFileInFileSystem(secondPath));
-					
-					this.updateValue(oneComparison);
-					currentProgress = currentProgress + percentProgressPerFile;
-					this.updateProgress(currentProgress, 100);
-					
+
+					currentProgress = this.updateGuiThread(oneComparison, currentProgress, percentProgressPerFile);
 					break inner;
 				}
 				// last run through all existing files had no match.
@@ -96,11 +87,7 @@ public class FolderComparison extends Task<HBox>{
 					Path path = Paths.get(filesFromDirectoryA.get(i).getAbsolutePath());
 					pathToFirstFile.setOnMouseClicked(this.showFileInFileSystem(path));
 
-					this.updateValue(oneComparison);
-					currentProgress = currentProgress + percentProgressPerFile;
-					this.updateProgress(currentProgress, 100);
-					//this.progressProperty().add(22);
-					
+					currentProgress = this.updateGuiThread(oneComparison, currentProgress, percentProgressPerFile);
 					break inner;
 				}
 			}
@@ -108,7 +95,21 @@ public class FolderComparison extends Task<HBox>{
 		return true;
 	}
 
-	private EventHandler<MouseEvent> showFileInFileSystem(Path path){
+	private double updateGuiThread(HBox oneComparison, double currentProgress, double percentProgressPerFile) {
+		//create new list with old values so that this.updateValue(boxList); works. 
+		//the update value seems to only work if a new object is set as the updated object
+		ArrayList<HBox> newList = new ArrayList<>();
+		newList.addAll(boxList);
+		boxList = newList;
+		
+		boxList.add(oneComparison);
+		this.updateValue(boxList);
+		currentProgress = currentProgress + percentProgressPerFile;
+		this.updateProgress(currentProgress, 100);
+		return currentProgress;
+	}
+	
+	private EventHandler<MouseEvent> showFileInFileSystem(Path path) {
 		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -126,14 +127,15 @@ public class FolderComparison extends Task<HBox>{
 						try {
 							// this linux file system opening seems to be bugged
 							Desktop.getDesktop().open(parentFile);
-							// desktop.open(fileXYZ);
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
 					}
 				} else {
 					Stage stage = new Stage();
-					VBox box = new VBox();box.setAlignment(Pos.CENTER);box.setSpacing(15);
+					VBox box = new VBox();
+					box.setAlignment(Pos.CENTER);
+					box.setSpacing(15);
 					Scene scene = new Scene(box, 300, 100, Color.BLACK);
 					Label lable = new Label();
 					lable.setText("Not Supported OS to show file system");
@@ -144,12 +146,12 @@ public class FolderComparison extends Task<HBox>{
 					box.getChildren().addAll(lable, closePopUp);
 					stage.setScene(scene);
 					stage.show();
-				}	
+				}
 			}
 		};
 		return eventHandler;
 	}
-	
+
 	private ArrayList<File> allFilesInFolderAndSubfolder(File directory, ArrayList<File> files) {
 		// get all the files from a directory
 		File[] fList = directory.listFiles();
@@ -165,12 +167,15 @@ public class FolderComparison extends Task<HBox>{
 	}
 
 	@Override
-	protected HBox call() throws Exception {
+	protected ArrayList<HBox> call() throws Exception {
 		this.areFoldersEqual(directoryA, directoryB);
-		HBox emptyBox = new HBox();
-		Label label = new Label(); label.setText("Finished");
-		emptyBox.getChildren().add(label);
-		return emptyBox;
+		
+		HBox finishedMessageBox = new HBox();
+		Label label = new Label();
+		label.setText("Finished");
+		finishedMessageBox.getChildren().add(label);
+		boxList.add(finishedMessageBox);
+		return boxList;
 	}
 
 }

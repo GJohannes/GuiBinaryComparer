@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 import javafx.animation.KeyFrame;
@@ -51,7 +52,7 @@ public class MainWindowController{
 		FolderComparison folderComparison = new FolderComparison(directoryOrFileA, directoryOrFileB, mainWindow);
 		Thread thread = new Thread(folderComparison);
 		
-		folderComparison.messageProperty().addListener(e ->{
+		folderComparison.messageProperty().addListener(e -> {
 			if(folderComparison.getMessage().equals(STATES.FINISHED_FIRST_COMPARISON.toString())) {
 				mainWindow.informationMappingFilesA.setGraphic(mainWindow.images.getGreenCheckIcon());mainWindow.informationMappingFilesA.setText("Finished Mapping");				
 			} else if (folderComparison.getMessage().equals(STATES.FINISHED_SECOND_COMPARISON.toString())) {
@@ -63,8 +64,16 @@ public class MainWindowController{
 		});
 		
 		folderComparison.valueProperty().addListener(e -> {
-			mainWindow.folderResults.getChildren().add(folderComparison.getValue());
-		});
+			ArrayList<HBox> tempList = new ArrayList<>();
+			tempList = folderComparison.getValue();
+			
+			for(int i = 0; i < tempList.size(); i++) {
+				//if box is not already placed on GUI then add
+				if(!mainWindow.folderResults.getChildren().contains(tempList.get(i))) {
+					mainWindow.folderResults.getChildren().add(tempList.get(i));
+				}
+			}
+		});	
 		
 		folderComparison.progressProperty().addListener(e -> {
 			mainWindow.progressBar.setProgress(folderComparison.getProgress());

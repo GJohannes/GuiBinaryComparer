@@ -101,6 +101,7 @@ public class MainWindow {
 		//update permanent 
 		Timeline updatingGuiTask = new Timeline(new KeyFrame(Duration.millis(50), e -> {
 			mappedTotalFiles.setText(Integer.toString(GuiAndWorkerSharedValues.getTotalFiles()) + " - Files Mapped");
+			System.out.println(folderResults.getChildren().size());
 		}));
 		
 		updatingGuiTask.setCycleCount(Timeline.INDEFINITE);
