@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -20,7 +21,7 @@ import miscellaneous.FileOrDirectory;
 import miscellaneous.ImageLoader;
 
 public class MainWindow {
-	private int windowSize = 800;
+	private int windowSize = 900;
 	public Integer totalFiles = 0;
 	
 	VBox folderResults;
@@ -41,20 +42,24 @@ public class MainWindow {
 	public void start(Stage stage) {
 		Scene scene = mainWindowVisuals(stage);
 		stage.setMaxWidth(windowSize);
+		stage.setMinWidth(windowSize);
 		stage.setTitle("BinaryComparer");
 		stage.setScene(scene);
 		stage.show();
+		
 	}
 	
 	private Scene mainWindowVisuals(Stage stage) {
 		VisualSegments segment = new VisualSegments();
 		
-		VBox root = new VBox();root.setSpacing(20);root.setStyle("-fx-background-color: #b7b7db;");root.setPrefWidth(windowSize);
+		
+		VBox root = new VBox();root.setSpacing(20);root.setStyle("-fx-background-color: #b7b7db;");root.setPrefWidth(windowSize-10);
 			HBox titleBox = new HBox();titleBox.setAlignment(Pos.CENTER);titleBox.centerShapeProperty();
 				Label title = new Label(); title.setGraphic(images.getTitleImage());
+				title.getGraphic().setScaleX(4);title.getGraphic().setScaleY(4);title.setMinHeight(70);
 			titleBox.getChildren().addAll(title);
 
-			HBox fileComparison = new HBox();fileComparison.setSpacing(10);fileComparison.setAlignment(Pos.CENTER);
+			HBox fileComparison = new HBox();fileComparison.setAlignment(Pos.CENTER);fileComparison.setSpacing(10);
 				VBox resultBox = new VBox();
 					resultLabel = new Label();resultLabel.setText("Result:               ");
 					compareFile = new Button("Compare Both Files");
@@ -87,12 +92,16 @@ public class MainWindow {
 		
 		root.getChildren().addAll(titleBox, fileComparison,folderComparisonAndResult);
 		
+		
 		ScrollPane scroll = new ScrollPane();
+		
+		
 		scroll.setContent(root);
 		
-		Scene scene = new Scene(scroll, windowSize, 400, Color.BLACK);
 		
-	
+		Scene scene = new Scene(scroll, windowSize, 400, Color.AQUA);
+		
+		
 		MainWindowController controller = new MainWindowController(this);
 		return scene;
 	}

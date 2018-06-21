@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import com.sun.org.apache.xerces.internal.parsers.CachingParserPool.SynchronizedGrammarPool;
 
 import gui.MainWindow;
 import javafx.concurrent.Task;
@@ -127,7 +126,6 @@ public class FolderComparison extends Task<ArrayList<HBox>> {
 					File file = new File(path.toString());
 					File parentFile = new File(file.getParent());
 					if (parentFile.exists() && parentFile.isDirectory()) {
-						Desktop desktop = Desktop.getDesktop();
 						try {
 							// this linux file system opening seems to be bugged
 							Desktop.getDesktop().open(parentFile);

@@ -5,7 +5,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class GuiAndWorkerSharedValues {
-	private static int totalFiles;
+	private static volatile int totalFiles;
 
 	public static synchronized int getTotalFiles() {
 		return totalFiles;
